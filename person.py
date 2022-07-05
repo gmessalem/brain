@@ -1,7 +1,7 @@
 import math
 import statistics
 
-cone_angular_width = 40
+cone_angular_width = 50
 
 def normalize_angle(ang):
     if ang < 0:
@@ -53,22 +53,5 @@ class Person:
                 if self.in_angular_view(neighbor) and self.in_distance_view(neighbor):
                     people_i_see_angles_list.append(neighbor.dir_deg)
         if len(people_i_see_angles_list) > 0:
-            self.dir_deg = statistics.median(people_i_see_angles_list)
+            self.dir_deg = (statistics.median(people_i_see_angles_list) + self.dir_deg)/2
 
-    # def new_dir(self, people_list):
-    #     dir_list = []
-    #     updated_dir = 0
-    #     max_sight = p.dir + 20
-    #     min_sight = p.dir - 20
-    #     for neighbor in people_list:
-    #         if p is not neighbor:
-    #             alpha = math.atan2((neighbor.y - p.y), (neighbor.x - p.x))
-    #             if alpha > min_sight and alpha < max_sight:
-    #                 if p.distance(neighbor) <= sight_dist:
-    #                     dir_list.append(neighbor.dir)
-    #                     updated_dir = statistics.median(dir_list)
-    #                 else:
-    #                     updated_dir = p.dir
-    #             else:
-    #                 updated_dir = p.dir
-    #     p.dir = updated_dir

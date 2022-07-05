@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     number_of_itterations = 50
     building = building.Building(100,100)
-    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 1, 10) for i in
+    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 1, 30) for i in
                range(100)]
 
 
