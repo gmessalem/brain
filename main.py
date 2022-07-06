@@ -18,6 +18,14 @@ if __name__ == '__main__':
             new_person = p
             new_person.new_dir(people_list)
             new_person.new_loc()
+            if new_person.x > building.length:
+                new_person.x = building.length
+            elif new_person.x < 0:
+                new_person.x = 0
+            if new_person.y > building.width:
+                new_person.y = building.width
+            elif new_person.y < 0:
+                new_person.y = 0
             new_people_list.append(new_person)
         return new_people_list
 
