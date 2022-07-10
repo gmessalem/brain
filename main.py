@@ -30,7 +30,12 @@ if __name__ == '__main__':
         return new_people_list
 
 
+    fig, axs = plt.subplots()
+    axs.set_aspect('equal', 'box')
+    fig.tight_layout()
+
     plt.plot([p.x for p in persons], [p.y for p in persons], 'r.')
+
     for _ in range(number_of_itterations):
         persons = step(persons)
         plt.plot([p.x for p in persons], [p.y for p in persons], 'g.')

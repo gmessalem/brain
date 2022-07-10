@@ -60,9 +60,9 @@ class Person:
         dot_list = []
         max_sight = self.dir_deg + cone_angular_width/2
         min_sight = self.dir_deg - cone_angular_width / 2
-        sight_range = max_sight - min_sight
-        for ang in range(0, math.floor(sight_range), math.floor(sight_range/10)):
-            x_dot = self.sight_distance * math.cos(math.radians(ang))
-            y_dot = self.sight_distance * math.sin(math.radians(ang))
+
+        for ang in range(math.floor(min_sight), math.floor(max_sight), math.floor(cone_angular_width/10)):
+            x_dot = self.x + self.sight_distance * math.cos(math.radians(ang))
+            y_dot = self.y + self.sight_distance * math.sin(math.radians(ang))
             dot_list.append((x_dot, y_dot))
         return dot_list
