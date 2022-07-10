@@ -19,6 +19,10 @@ class Person:
         self.step_size = step_size
         self.sight_distance = sight_distance
 
+    def __str__(self):
+        return 'Person(x=' + str(self.x) + ', y=' + str(self.y) + ', dir=' + str(self.dir_deg) + ', step_size=' \
+               + str(self.step_size) + ', sight_dist=' + str(self.sight_distance) + ')'
+
     def distance(self, other):
         return math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
 
@@ -37,9 +41,6 @@ class Person:
     def in_distance_view(self, other):
         return (self.distance(other) <= self.sight_distance)
 
-    def print(self):
-        print(self.x, self.y, self.dir_deg)
-
     def new_loc(self):
         new_x = self.x + self.step_size * math.cos(math.radians(self.dir_deg))
         new_y = self.y + self.step_size * math.sin(math.radians(self.dir_deg))
@@ -55,3 +56,13 @@ class Person:
         if len(people_i_see_angles_list) > 0:
             self.dir_deg = (statistics.median(people_i_see_angles_list) + self.dir_deg)/2
 
+    def ten_point_arc(self):
+        dot_list = []
+        max_sight = self.dir_deg + cone_angular_width/2
+        min_sight = self.dir_deg - cone_angular_width / 2
+        sight_range = max_sight - min_sight
+        for ang in range(0, math.floor(sight_range), math.floor(sight_range/10)):
+            x_dot = self.sight_distance * math.cos(math.radians(ang))
+            y_dot = self.sight_distance * math.sin(math.radians(ang))
+            dot_list.append((x_dot, y_dot))
+        return dot_list

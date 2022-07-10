@@ -7,14 +7,14 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     number_of_itterations = 50
     building = building.Building(100,100)
-    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 1, 30) for i in
+    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 5, 30) for i in
                range(100)]
 
 
     def step(people_list):
         new_people_list = []
         for p in people_list:
-            p.print()
+            print(p)
             new_person = p
             new_person.new_dir(people_list)
             new_person.new_loc()
