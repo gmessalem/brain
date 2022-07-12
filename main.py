@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':
-    number_of_itterations = 50
+    number_of_itterations = 100
     building = building.Building(100,100)
-    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 5, 30) for i in
+    persons = [person.Person(random.uniform(0, building.length), random.uniform(0, building.width), random.uniform(0, 360), 1, 10) for i in
                range(100)]
 
 
@@ -18,6 +18,7 @@ if __name__ == '__main__':
             new_person = p
             new_person.new_dir(people_list)
             new_person.new_loc()
+            new_person.dir_deg = (new_person.wall_avoidance(building) + new_person.dir_deg)/2
             if new_person.x > building.length:
                 new_person.x = building.length
             elif new_person.x < 0:
