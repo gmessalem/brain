@@ -1,7 +1,6 @@
 import math
 import random
 import statistics
-import building
 
 cone_angular_width = 50
 
@@ -37,11 +36,40 @@ class Person:
         alpha = self.angle_to(other)
         if counter_clock_wise > clock_wise: #hakol beseder
             return (alpha<counter_clock_wise and alpha>clock_wise)
-        else:
+        else: #oh no no no
             return (alpha<counter_clock_wise or alpha>clock_wise)
 
     def in_distance_view(self, other):
         return (self.distance(other) <= self.sight_distance)
+
+    # def angle_to_door(self, door):
+    #     tmp = list(door)
+    #     delt_x = tmp[0] - self.x
+    #     delt_y = tmp[1] - self.y
+    #     return math.atan2(delt_y, delt_x)
+    #
+    # def door_in_angview(self, door):
+    #     print(self.dir_deg)
+    #     counter_clock_wise = normalize_angle(self.dir_deg + cone_angular_width/2)
+    #     clock_wise = normalize_angle(self.dir_deg - cone_angular_width/2)
+    #     alpha = self.angle_to_door(door)
+    #     if counter_clock_wise > clock_wise: #it's fineeee
+    #         return (alpha<counter_clock_wise and alpha>clock_wise)
+    #     else: #we fucked up
+    #         return (alpha<counter_clock_wise or alpha>clock_wise)
+    #
+    # def dist_to_door(self, door):
+    #     tmp = list(door)
+    #     return math.sqrt((tmp[0] - self.x) ** 2 + (tmp[1] - self.y) ** 2)
+    #
+    # def door_in_distview(self, door):
+    #     return (self.dist_to_door(door) <= self.sight_distance)
+    #
+    # def run_away(self, door):
+    #     if self.door_in_angview(door) and self.door_in_distview(door):
+    #         print("door in view")
+    #         if self.dist_to_door(door) < self.step_size:
+    #             self.step_size = self.dist_to_door(door)
 
     def new_loc(self):
         new_x = self.x + self.step_size * math.cos(math.radians(self.dir_deg))
@@ -49,7 +77,18 @@ class Person:
         self.x = new_x
         self.y = new_y
 
-    def new_dir(self, people_list):
+    def dir_to_door_in_view(self, building):
+        reach_list = self.ten_point_arc()
+
+        return None
+
+    def new_dir(self, people_list, building):
+        # is there a door? if so, get new direction of door
+        dir_to = self.dir_to_door_in_view(building)
+        if dir_to != None:
+            self.dir_deg = dir_to
+            return
+        # else take direction of crowd
         people_i_see_angles_list = []
         for neighbor in people_list:
             if self is not neighbor:
