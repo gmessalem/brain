@@ -1,101 +1,120 @@
 import math
 import random
 import statistics
+import matplotlib.pyplot as plt
 
 cone_angular_width = 50
+debug_global_person_id = 0
 
+#todo add point
+
+# return angle between 0 and 360 degrees
 def normalize_angle(ang):
-    if ang < 0:
+    while ang < 0:
         ang += 360
-    if ang > 360:
+    while ang > 360:
         ang -= 360
     return ang
 
-class Person:
 
-    def __init__(self, x_pos, y_pos, dir_deg, step_size, sight_distance):
-        self.x = x_pos
-        self.y = y_pos
+
+class Person:
+    # global debug_global_person_id
+    def __init__(self, loc, dir_deg, step_size, sight_distance):
+        global debug_global_person_id
+        self.loc = loc
         self.dir_deg = dir_deg # angle from positive x axis in degrees
         self.step_size = step_size
         self.sight_distance = sight_distance
+        debug_global_person_id += 1
+        self.name = str(debug_global_person_id)
 
     def __str__(self):
-        return 'Person(x=' + str(self.x) + ', y=' + str(self.y) + ', dir=' + str(self.dir_deg) + ', step_size=' \
+        return 'Person(name=' + self.name + ', loc=' + str(self.loc) + ', dir=' + str(self.dir_deg) + ', step_size=' \
                + str(self.step_size) + ', sight_dist=' + str(self.sight_distance) + ')'
 
-    def distance(self, other):
-        return math.sqrt((other.x - self.x) ** 2 + (other.y - self.y) ** 2)
+    def plot_me(self, colorstyle):
+        plt.plot([self.loc.x], [self.loc.y], colorstyle)
 
-    def angle_to(self, other):
-        return math.degrees(math.atan2((other.y - self.y), (other.x - self.x)))
+    def plot_debug(self, ax):
+        ax.annotate("", xy=(self.loc.x + self.sight_distance*math.cos(math.radians(self.dir_deg)),
+                            self.loc.y + self.sight_distance*math.sin(math.radians(self.dir_deg))),
+                    xytext=(self.loc.x, self.loc.y), arrowprops = dict(arrowstyle="->"))
 
-    def in_angular_view(self, other):
+    def distance_between_points(self, p1, p2):
+        return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
+
+    def angle_to(self, p):
+        return self.angle_between_points(self.loc, p)
+
+    def in_angular_view(self, p):
         counter_clock_wise = normalize_angle(self.dir_deg + cone_angular_width/2)
         clock_wise = normalize_angle(self.dir_deg - cone_angular_width / 2)
-        alpha = self.angle_to(other)
+        alpha = normalize_angle(self.angle_to(p))
         if counter_clock_wise > clock_wise: #hakol beseder
             return (alpha<counter_clock_wise and alpha>clock_wise)
         else: #oh no no no
             return (alpha<counter_clock_wise or alpha>clock_wise)
 
-    def in_distance_view(self, other):
-        return (self.distance(other) <= self.sight_distance)
-
-    # def angle_to_door(self, door):
-    #     tmp = list(door)
-    #     delt_x = tmp[0] - self.x
-    #     delt_y = tmp[1] - self.y
-    #     return math.atan2(delt_y, delt_x)
-    #
-    # def door_in_angview(self, door):
-    #     print(self.dir_deg)
-    #     counter_clock_wise = normalize_angle(self.dir_deg + cone_angular_width/2)
-    #     clock_wise = normalize_angle(self.dir_deg - cone_angular_width/2)
-    #     alpha = self.angle_to_door(door)
-    #     if counter_clock_wise > clock_wise: #it's fineeee
-    #         return (alpha<counter_clock_wise and alpha>clock_wise)
-    #     else: #we fucked up
-    #         return (alpha<counter_clock_wise or alpha>clock_wise)
-    #
-    # def dist_to_door(self, door):
-    #     tmp = list(door)
-    #     return math.sqrt((tmp[0] - self.x) ** 2 + (tmp[1] - self.y) ** 2)
-    #
-    # def door_in_distview(self, door):
-    #     return (self.dist_to_door(door) <= self.sight_distance)
-    #
-    # def run_away(self, door):
-    #     if self.door_in_angview(door) and self.door_in_distview(door):
-    #         print("door in view")
-    #         if self.dist_to_door(door) < self.step_size:
-    #             self.step_size = self.dist_to_door(door)
+    def angle_between_points(self, p1, p2):
+        return math.degrees(math.atan2(p2.y-p1.y, p2.x-p1.x))
 
     def new_loc(self):
-        new_x = self.x + self.step_size * math.cos(math.radians(self.dir_deg))
-        new_y = self.y + self.step_size * math.sin(math.radians(self.dir_deg))
-        self.x = new_x
-        self.y = new_y
+        new_x = self.loc.x + self.step_size * math.cos(math.radians(self.dir_deg))
+        new_y = self.loc.y + self.step_size * math.sin(math.radians(self.dir_deg))
+        self.loc.x = new_x
+        self.loc.y = new_y
 
-    def dir_to_door_in_view(self, building):
-        reach_list = self.ten_point_arc()
-
-        return None
-
+    ####################################
+    #   method: choose_new_dir()
+    #
+    #   Choose a direction and set the self.dir_deg accordingly. Steps to follow:
+    #   1. Can i see a fire? if so, turn away.
+    #   2. Can i see a door? doors? if so, turn towards middle of nearest door.
+    #   3. Can i see a wall? walls? if so, turn to avoid collision.
+    #   4. Turn in direction of median of people direction
+    #
     def new_dir(self, people_list, building):
         # is there a door? if so, get new direction of door
-        dir_to = self.dir_to_door_in_view(building)
-        if dir_to != None:
-            self.dir_deg = dir_to
+        nearest_door_dir = self.get_nearest_door_in_my_view(building)
+        if nearest_door_dir != None:
+            print(self, "i see a door. going to it.")
+            corners = building.doors.get(nearest_door_dir).get_corners()
+            angle = (self.angle_to(corners[0]) + self.angle_to(corners[1])) / 2
+            self.dir_deg = angle
             return
+        # else avoid wall
+        if self.i_see_wall(building):
+            print(self, "i see a wall. avoiding it.")
+            self.dir_deg = (self.wall_avoidance_dir(building) + self.dir_deg) / 2
+            return
+
         # else take direction of crowd
         people_i_see_angles_list = []
         for neighbor in people_list:
             if self is not neighbor:
-                if self.in_angular_view(neighbor) and self.in_distance_view(neighbor):
+                if self.in_angular_view(neighbor.loc) and (self.distance_between_points(self.loc, neighbor.loc) <= self.sight_distance):
                     people_i_see_angles_list.append(neighbor.dir_deg)
         if len(people_i_see_angles_list) > 0:
+            print(self, "i see people. going in their general direction.")
             self.dir_deg = (statistics.median(people_i_see_angles_list) + self.dir_deg)/2
+
+    def get_nearest_door_in_my_view(self, building):
+        nearest_door = {'dir': None, 'distance': 9999}
+        for dir in building.doors:
+            door = building.doors.get(dir)
+            corners = door.get_corners()
+            distance = []
+            distance.append(self.distance_between_points(self.loc, corners[0]))
+            distance.append(self.distance_between_points(self.loc, corners[1]))
+            # print("door[" + dir + "] : " + str(door) + ", min distance: " + str(min(distance)))
+            min_distance = min(distance)
+            if min_distance <= self.sight_distance:
+                if self.in_angular_view(corners[0]) or self.in_angular_view(corners[1]):
+                    if min_distance < nearest_door['distance']:
+                        nearest_door['distance'] = min_distance
+                        nearest_door['dir'] = dir
+        return nearest_door['dir']
 
     def ten_point_arc(self):
         dot_list = []
@@ -103,8 +122,8 @@ class Person:
         min_sight = self.dir_deg - cone_angular_width / 2
 
         for ang in range(math.floor(min_sight), math.floor(max_sight), math.floor(cone_angular_width/10)):
-            x_dot = self.x + self.sight_distance * math.cos(math.radians(ang))
-            y_dot = self.y + self.sight_distance * math.sin(math.radians(ang))
+            x_dot = self.loc.x + self.sight_distance * math.cos(math.radians(ang))
+            y_dot = self.loc.y + self.sight_distance * math.sin(math.radians(ang))
             dot_list.append((x_dot, y_dot))
         return dot_list
 
@@ -126,7 +145,22 @@ class Person:
             while self.corner_check(building):
                 self.dir_deg = random.uniform(0, 360)
 
-    def wall_avoidance(self, building):
+    def i_see_wall(self, building):
+        view_dot_list = self.ten_point_arc()
+        for point in view_dot_list:
+            if point[0] > building.length or point[0] < 0:
+                if 90 >= self.dir_deg > 0 or 180 >= self.dir_deg > 90:
+                    return True
+                elif 270 <= self.dir_deg < 360 or 180 < self.dir_deg <= 270:
+                    return True
+            elif point[1] > building.width or point[1] < 0:
+                if 90 > self.dir_deg >= 0 or 270 < self.dir_deg <= 360:
+                    return True
+                elif 180 >= self.dir_deg > 90 or 180 <= self.dir_deg < 270:
+                    return True
+        return False
+
+    def wall_avoidance_dir(self, building):
         self.fuck_corners(building)
         view_dot_list = self.ten_point_arc()
         new_dir_list = [self.dir_deg]
@@ -142,3 +176,4 @@ class Person:
                 elif 180 >= self.dir_deg > 90 or 180 <= self.dir_deg < 270:
                     new_dir_list.append(180)
         return statistics.median(new_dir_list)
+
