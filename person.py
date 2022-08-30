@@ -3,7 +3,7 @@ import random
 import statistics
 import matplotlib.pyplot as plt
 
-cone_angular_width = 50
+cone_angular_width = 100
 debug_global_person_id = 0
 
 #todo add point
@@ -52,6 +52,8 @@ class Person:
         clock_wise = normalize_angle(self.dir_deg - cone_angular_width / 2)
         alpha = normalize_angle(self.angle_to(p))
         if counter_clock_wise > clock_wise: #hakol beseder
+            #debug print
+            # print("counter_clock: " + str(counter_clock_wise) + "\nclock: " + str(clock_wise) + "\nalpha: " + str(alpha))
             return (alpha<counter_clock_wise and alpha>clock_wise)
         else: #oh no no no
             return (alpha<counter_clock_wise or alpha>clock_wise)
@@ -75,18 +77,24 @@ class Person:
     #   4. Turn in direction of median of people direction
     #
     def new_dir(self, people_list, building):
+        #is there a fire? if so, turn away from it
+        nearest_fire_dir = self.get_nearest_fire_in_my_view(building)
+        if nearest_fire_dir != None:
+            print(self, "i see a fire. turning away from it.")
+            self.dir_deg = normalize_angle(nearest_fire_dir)
+            return
         # is there a door? if so, get new direction of door
         nearest_door_dir = self.get_nearest_door_in_my_view(building)
         if nearest_door_dir != None:
             print(self, "i see a door. going to it.")
             corners = building.doors.get(nearest_door_dir).get_corners()
             angle = (self.angle_to(corners[0]) + self.angle_to(corners[1])) / 2
-            self.dir_deg = angle
+            self.dir_deg = normalize_angle(angle)
             return
         # else avoid wall
         if self.i_see_wall(building):
             print(self, "i see a wall. avoiding it.")
-            self.dir_deg = (self.wall_avoidance_dir(building) + self.dir_deg) / 2
+            self.dir_deg = normalize_angle((self.wall_avoidance_dir(building) + self.dir_deg) / 2)
             return
 
         # else take direction of crowd
@@ -98,6 +106,20 @@ class Person:
         if len(people_i_see_angles_list) > 0:
             print(self, "i see people. going in their general direction.")
             self.dir_deg = (statistics.median(people_i_see_angles_list) + self.dir_deg)/2
+
+    def get_nearest_fire_in_my_view(self, building):
+        nearest_fire = {'dir': None, 'distance': 9999}
+        for fire in building.fires:
+            distance = self.distance_between_points(self.loc, fire)
+            if distance <= self.sight_distance:
+                if self.in_angular_view(fire):
+
+                    if distance < nearest_fire['distance']:
+                        nearest_fire['distance'] = distance
+                        nearest_fire['dir'] = normalize_angle(self.angle_to(fire) + 180)
+        return nearest_fire['dir']
+
+
 
     def get_nearest_door_in_my_view(self, building):
         nearest_door = {'dir': None, 'distance': 9999}
@@ -170,9 +192,11 @@ class Person:
                     new_dir_list.append(90)
                 elif 270 <= self.dir_deg < 360 or 180 < self.dir_deg <= 270:
                     new_dir_list.append(270)
-            elif point[1] > building.width or point[1] < 0:
-                if 90 > self.dir_deg >= 0 or 270 < self.dir_deg <= 360:
+            if point[1] > building.width or point[1] < 0:
+                if 90 > self.dir_deg >= 0:
                     new_dir_list.append(0)
+                elif 270 < self.dir_deg <= 360:
+                    new_dir_list.append(360)
                 elif 180 >= self.dir_deg > 90 or 180 <= self.dir_deg < 270:
                     new_dir_list.append(180)
         return statistics.median(new_dir_list)

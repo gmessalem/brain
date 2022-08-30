@@ -3,21 +3,27 @@ import person
 import building
 import point
 import matplotlib
-matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
+matplotlib.use("TkAgg")
 
 
 if __name__ == '__main__':
-    number_of_people = 5
+    number_of_people = 10
     number_of_itterations = 100
+    fire_radius = 10
+    # number_of_fires = 2
 
     my_building = building.Building(length=100, width=160, doors={"north" : building.Building.Door(loc=70, width=20),
                                                                   "south" : building.Building.Door(loc=20, width=10),
-                                                                  "east": building.Building.Door(loc=30, width=10)})
+                                                                  "east": building.Building.Door(loc=30, width=10)},
+                                    fires=[point.Point(20, 20), point.Point(80, 70), point.Point(40, 50), point.Point(2, 90)])
 
     # make sure steps are not equal or longer than door sizes
     persons = [person.Person(loc=point.Point(random.uniform(0, my_building.length), random.uniform(0, my_building.width)),
                              dir_deg=random.uniform(0, 360), step_size=1, sight_distance=10) for i in range(number_of_people)]
+
+    #debug person
+    # persons = [person.Person(loc=point.Point(60, 45), dir_deg=180, step_size=1, sight_distance=10)]
 
 
     def step(people_list):
@@ -69,5 +75,3 @@ if __name__ == '__main__':
 
         plt.pause(0.2)
         persons = persons_new
-
-
