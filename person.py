@@ -80,20 +80,20 @@ class Person:
         #is there a fire? if so, turn away from it
         nearest_fire_dir = self.get_nearest_fire_in_my_view(building)
         if nearest_fire_dir != None:
-            print(self, "i see a fire. turning away from it.")
+            # print(self, "i see a fire. turning away from it.")
             self.dir_deg = normalize_angle(nearest_fire_dir)
             return
         # is there a door? if so, get new direction of door
         nearest_door_dir = self.get_nearest_door_in_my_view(building)
         if nearest_door_dir != None:
-            print(self, "i see a door. going to it.")
+            # print(self, "i see a door. going to it.")
             corners = building.doors.get(nearest_door_dir).get_corners()
             angle = (self.angle_to(corners[0]) + self.angle_to(corners[1])) / 2
             self.dir_deg = normalize_angle(angle)
             return
         # else avoid wall
         if self.i_see_wall(building):
-            print(self, "i see a wall. avoiding it.")
+            # print(self, "i see a wall. avoiding it.")
             self.dir_deg = normalize_angle((self.wall_avoidance_dir(building) + self.dir_deg) / 2)
             return
 
@@ -104,7 +104,7 @@ class Person:
                 if self.in_angular_view(neighbor.loc) and (self.distance_between_points(self.loc, neighbor.loc) <= self.sight_distance):
                     people_i_see_angles_list.append(neighbor.dir_deg)
         if len(people_i_see_angles_list) > 0:
-            print(self, "i see people. going in their general direction.")
+            # print(self, "i see people. going in their general direction.")
             self.dir_deg = (statistics.median(people_i_see_angles_list) + self.dir_deg)/2
 
     def get_nearest_fire_in_my_view(self, building):
@@ -131,7 +131,7 @@ class Person:
             distance.append(self.distance_between_points(self.loc, corners[1]))
             # print("door[" + dir + "] : " + str(door) + ", min distance: " + str(min(distance)))
             min_distance = min(distance)
-            if min_distance <= self.sight_distance:
+            if min_distance <= (self.sight_distance * building.door_lighting):
                 if self.in_angular_view(corners[0]) or self.in_angular_view(corners[1]):
                     if min_distance < nearest_door['distance']:
                         nearest_door['distance'] = min_distance

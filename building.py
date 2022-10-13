@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import point
 
 class Building:
-    def __init__(self, length, width, doors, fires):
+    def __init__(self, length, width, doors, fires, door_lighting):
         self.length = length
         self.width = width
         self.fires = fires
+        self.door_lighting = door_lighting
         self.doors = doors.copy()
         for dir in self.doors:
             door = self.doors.get(dir)
