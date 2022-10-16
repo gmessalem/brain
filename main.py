@@ -2,23 +2,38 @@ import random
 import person
 import building
 import point
+import statistics
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
 
+#doors:
+#doors={"north" : building.Building.Door(loc=50, width=10),
+                                                                  # "south" : building.Building.Door(loc=50, width=10),
+                                                                  # "east": building.Building.Door(loc=75, width=10),
+                                                                  # "west": building.Building.Door(loc=75, width=10)}
+
+# fires=[point.Point(50, 145), point.Point(50, 5), point.Point(5, 75), point.Point(95, 75)]
 
 if __name__ == '__main__':
     number_of_people = 100
-    number_of_itterations = 10
+    number_of_itterations = 20
     fire_radius = 10
-    lethality_limit = 190
+    lethality_limit = 250
     with_graphics = False
 
-    my_building = building.Building(length=100, width=150, doors={"north" : building.Building.Door(loc=50, width=10),
-                                                                  "south" : building.Building.Door(loc=50, width=10),
-                                                                  "east": building.Building.Door(loc=75, width=10),
-                                                                  "west": building.Building.Door(loc=75, width=10)},
-                                    fires=[point.Point(50, 145), point.Point(50, 5), point.Point(5, 75), point.Point(95, 75)],
+    # my_building = building.Building(length=110, width=165, doors={"north" : building.Building.Door(loc=55, width=10),
+    #                                                               "south" : building.Building.Door(loc=55, width=10),
+    #                                                               "east": building.Building.Door(loc=82.5, width=10),
+    #                                                               "west": building.Building.Door(loc=82.5, width=10)},
+    #                                 fires=[point.Point(55, 5), point.Point(5, 82.5), point.Point(105, 82.5)],
+    #                                 door_lighting=1)
+
+    my_building = building.Building(length=110, width=165, doors={"north" : building.Building.Door(loc=55, width=10),
+                                                                  "south" : building.Building.Door(loc=55, width=10),
+                                                                  "east": building.Building.Door(loc=82.5, width=10),
+                                                                  "west": building.Building.Door(loc=82.5, width=10)},
+                                    fires=[point.Point(55, 140), point.Point(55, 25), point.Point(25, 82.5), point.Point(85, 82.5)],
                                     door_lighting=1)
 
 
@@ -37,25 +52,25 @@ if __name__ == '__main__':
             new_person.new_dir(people_list, my_building)
             new_person.new_loc()
             if new_person.loc.x > my_building.length:
-                print(new_person, "elvis has left the building!")
+                # print(new_person, "elvis has left the building!")
                 continue
                 # new_person.loc.x = my_building.length # <-- fix this as well
             elif new_person.loc.x < 0:
-                print(new_person, "elvis has left the building!")
+                # print(new_person, "elvis has left the building!")
                 continue
                 # new_person.loc.x = 0
             if new_person.loc.y > my_building.width:
-                print(new_person, "elvis has left the building!")
+                # print(new_person, "elvis has left the building!")
                 continue
                 # new_person.loc.y = my_building.width
             elif new_person.loc.y < 0:
-                print(new_person, "elvis has left the building!")
+                # print(new_person, "elvis has left the building!")
                 continue
                 # new_person.loc.y = 0
             new_people_list.append(new_person)
         lethality_countdown -= 1
         if lethality_countdown <= 0:
-            print("Simulation Time: " + str(lethality_limit) + " steps\nCasualties: " + str(len(people_list)/number_of_people*100) + "%")
+            # print("Simulation Time: " + str(lethality_limit) + " steps\nCasualties: " + str(len(people_list)/number_of_people*100) + "%")
             return new_people_list
         return new_people_list
 
@@ -99,3 +114,5 @@ if __name__ == '__main__':
             persons = persons_new
         multi_run_casualties_percent.append(round(len(persons)/number_of_people*100)) #something is wrong, bug here
     print(multi_run_casualties_percent)
+    print("The average percent of casualties over", str(number_of_itterations), "runs is:",str(statistics.mean(multi_run_casualties_percent)) + "%")
+    print(statistics.stdev(multi_run_casualties_percent))
