@@ -162,7 +162,7 @@ class Person:
         else:
             return False
 
-    def fuck_corners(self, building):
+    def avoid_corners(self, building):
         if self.corner_check(building):
             while self.corner_check(building):
                 self.dir_deg = random.uniform(0, 360)
@@ -183,7 +183,7 @@ class Person:
         return False
 
     def wall_avoidance_dir(self, building):
-        self.fuck_corners(building)
+        self.avoid_corners(building)
         view_dot_list = self.ten_point_arc()
         new_dir_list = [self.dir_deg]
         for point in view_dot_list:
